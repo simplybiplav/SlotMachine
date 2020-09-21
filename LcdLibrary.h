@@ -1,17 +1,46 @@
 #ifndef _LCD_LIBRARY_H
 #define _LCD_LIBRARY_H
 
-#if !defined(LCD_IO_1) || !defined(LCD_IO_2)
-#error "LCD_IO_1 and LCD_IO_2 not defined"
+#include "config.h"
+
+#if !defined(LCD_IO_1ST_PORT_LETTER) || !defined(LCD_IO_2ND_PORT_LETTER)
+#error "LCD_IO_1ST_PORT_LETTER and LCD_IO_2ND_PORT_LETTER not defined"
 #endif
 
-#define LCD_IO_1_DD  DDR ## LCD_IO_1 
-#define LCD_IO_1_PORT  PORT ## LCD_IO_1 
-#define LCD_IO_1_PIN  PIN ## LCD_IO_1 
 
-#define LCD_IO_2_DD  DDR ## LCD_IO_2 
-#define LCD_IO_2_PORT  PORT ## LCD_IO_2 
-#define LCD_IO_2_PIN  PIN ## LCD_IO_2 
+#define LCD_IO_1_DD  PORT_LETTER_TO_DD(LCD_IO_1ST_PORT_LETTER)
+#define LCD_IO_1_PORT  PORT_LETTER_TO_PORT(LCD_IO_1ST_PORT_LETTER)
+#define LCD_IO_1_PIN  PORT_LETTER_TO_PIN(LCD_IO_1ST_PORT_LETTER) 
+#define LCD_IO_2_DD  PORT_LETTER_TO_DD(LCD_IO_2ND_PORT_LETTER)
+#define LCD_IO_2_PORT PORT_LETTER_TO_PORT(LCD_IO_2ND_PORT_LETTER)
+#define LCD_IO_2_PIN  PORT_LETTER_TO_PIN(LCD_IO_2ND_PORT_LETTER) 
+/*
+#define LCD_IO_1_DD  _LCD_IO_1_DD(LCD_IO_1ST_PORT_LETTER)
+#define _LCD_IO_1_DD(PORT_LETTER)  __LCD_IO_1_DD(PORT_LETTER)
+#define __LCD_IO_1_DD(PORT_LETTER)  DDR ## PORT_LETTER
+
+#define LCD_IO_1_PORT  _LCD_IO_1_PORT(LCD_IO_1ST_PORT_LETTER)
+#define _LCD_IO_1_PORT(PORT_LETTER)  __LCD_IO_1_PORT(PORT_LETTER) 
+#define __LCD_IO_1_PORT(PORT_LETTER)  PORT ## PORT_LETTER 
+
+#define LCD_IO_1_PIN  _LCD_IO_1_PIN(LCD_IO_1ST_PORT_LETTER) 
+#define _LCD_IO_1_PIN(PORT_LETTER)  __LCD_IO_1_PIN(PORT_LETTER)
+#define __LCD_IO_1_PIN(PORT_LETTER)  PIN ## PORT_LETTER
+
+#define LCD_IO_2_DD  _LCD_IO_2_DD(LCD_IO_2ND_PORT_LETTER)
+#define _LCD_IO_2_DD(PORT_LETTER)  __LCD_IO_2_DD(PORT_LETTER)
+#define __LCD_IO_2_DD(PORT_LETTER)  DDR ## PORT_LETTER
+
+#define LCD_IO_2_PORT  _LCD_IO_2_PORT(LCD_IO_2ND_PORT_LETTER)
+#define _LCD_IO_2_PORT(PORT_LETTER)  __LCD_IO_2_PORT(PORT_LETTER)
+#define __LCD_IO_2_PORT(PORT_LETTER)  PORT ## PORT_LETTER 
+
+#define LCD_IO_2_PIN  _LCD_IO_2_PIN(LCD_IO_2ND_PORT_LETTER) 
+#define _LCD_IO_2_PIN(PORT_LETTER)  __LCD_IO_2_PIN(PORT_LETTER)
+#define __LCD_IO_2_PIN(PORT_LETTER)  PIN ## PORT_LETTER
+
+*/
+
 //#include <string.h>
 
 /*****************************************************************************
@@ -47,14 +76,5 @@ void LCD_WriteString(char Text[]);
 
 
 
-
-bool LCD_Init(bool twoLineMode,
-                bool largeFontMode)
-{
-    LCD_IO_1_DD = 0xFF;  // configure i/o port 1 for output
-    LCD_IO_1_PORT = 0x00; // clear i/o port 1
-    LCD_IO_2_DD = 0xFF; // configure i/o port 2 for output
-    LCD_IO_2_PORT = 0x00; // clear i/o port 1
-}
 
 #endif
