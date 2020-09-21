@@ -30,13 +30,58 @@ PORT 2(0->7) will be connected to 7->14
 #endif
 
 
+// RS = 0 and RW= 0 for command
+#define CLEAR_CMD     0b00000001 //write time 1.52 ms  
+#define HOME_CMD      0b00000010 //write time 1.52 ms
 
-#define LCD_VSS 0
-#define LCD_VDD 1
-#define LCD_VO 2
-#define LCD_RS 3
-#define LCD_RW 4
-#define LCD_EN 5
+
+
+// Display ON/OFF     0b00001DCB 
+// D =1, Display ON
+// C=1, Cursor ON
+// B=1, Cursor Position On
+#define DISPLAY_CMD 0b00001000    //write time 37 us
+#define DISPLAY_CMD_DISPLAY_ON_BIT 2 
+#define DISPLAY_CMD_CURSOR_ON_BIT 1 
+#define DISPLAY_CMD_CUR_POS_ON_BIT 0 
+
+
+//Cursor or Display Shift 0b0001(S/C)(R/L)XX
+// set cursor shift without changing DDRAM data 
+#define DISPLAY_SHIFT_CMD 0b00010000
+#define DISPLAY_SHIFT_CMD_SHIFT_CONTROL_BIT 3
+#define DISPLAY_SHIFT_CMD_DIRECTION_BIT 2
+
+
+// Function Set 001(DL)NFXX
+//DL = interface data 8/4 bits
+// N = Number of Line
+// 00H to 4FH in one line mode
+// 00H to 27H in 1st line , 40H to 67H in 2nd line
+// F = Font Size 5*11 / 5*8
+
+#define FUNCTION_CMD 0b00100000
+#define FUNCTION_CMD_INTERFACE_BIT 4
+#define FUNCTION_CMD_LINE_BIT 3
+#define FUNCTION_CMD_FONT_BIT 2
+
+
+
+// set CGRAM address 0b01(AC5-AC0)
+#define CGRAM_CMD 0b01000000 
+
+//set DGRAM address 0b1(AC6-AC0)
+
+#define DGRAM_CMD 0b10000000 
+
+
+
+
+/*
+For read RS = 1, RW=1
+For Write RS = 1, RW=0
+For reading busy flag RS=0,RW = 1
+*/
 
 #define LCD_D0 0
 #define LCD_D1 1
@@ -99,22 +144,25 @@ bool LCD_Init(bool twoLineMode ,
                 bool largeFontMode);
 
 
+void LCD_Set_CMD_Port_Out(unsigned bitsToWrite = ALL_BITS);
+void LCD_Set_CMD_Port_In(unsigned bitsToWrite = ALL_BITS);
+unsigned LCD_Read_CMD_Port(unsigned bitsToBeRead = ALL_BITS);
+void LCD_Write_CMD_Port(unsigned bitsToWrite,bool setReset);
 void LCD_Write_Command(unsigned char commandValue);
 void LCD_Write_Data(unsigned char dataValue);
 void LCD_Wait();
 void LCD_Enable();
 void LCD_Disable();
 void LCD_Write_String(char text[]);
+void LCD_Display_ON_OFF(bool displayON, bool cursorON, bool cursorPositionON); 
+void LCD_Clear();
+void LCD_Home();
+void LCD_ShiftDisplay(bool shiftDisplayON , bool directionRight );
 // *** END of 'Private' Functions accessed by other member functions - do not call these direct from application code ***
 
 #if 0
 // *** USER functions
-void LCD_Initilise(bool bTwoLine/*false = 1 line mode, true =  2 line mode*/, bool bLargeFont/*false = 5*8pixels, true = 5*11 pixels*/);
-void LCD_Display_ON_OFF(bool bDisplayON /*true = ON, false = OFF*/, bool bCursorON, bool bCursorPositionON); // Turn the LCD display ON / OFF
-void LCD_Clear();
-void LCD_Home();
 void LCD_WriteChar(unsigned char cValue);
-void LCD_ShiftDisplay(bool bShiftDisplayON /*true = On false = OFF*/, bool bDirectionRight /*true = shift right, false = shift left*/);
 void LCD_SetCursorPosition(unsigned char iColumnPosition /*0 - 40 */, unsigned char iRowPosition /*0 for top row, 1 for bottom row*/);
 void LCD_WriteString(char Text[]);
 

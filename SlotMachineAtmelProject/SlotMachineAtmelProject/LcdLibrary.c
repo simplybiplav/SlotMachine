@@ -4,20 +4,87 @@
 
 bool LCD_Init(bool twoLineMode, bool largeFontMode)
 {
-	LCD_IO_CMD_DD = OUTPUT_MODE;  // configure i/o port 1 for output
-	LCD_IO_CMD_PORT = INPUT_MODE; // clear i/o port 1
+    LCD_Set_CMD_Port_Out();
+    LCD_Write_CMD_Port(ALL_BITS, false); //clear bits
 	LCD_IO_DATA_DD = OUTPUT_MODE; // configure i/o port 2 for output
-	LCD_IO_DATA_PORT = INPUT_MODE; // clear i/o port 1
+	LCD_IO_DATA_PORT = CLEAR_BITS; // clear i/o port 1
+
+    unsigned char Command_value = FUNCTION_CMD;   
+    if(true == twoLineMode)                                                           
+    {                                                                              
+        Command_value |= (1 << FUNCTION_CMD_LINE_BIT);    
+    }                                                                              
+    else                                                                           
+    {   // One-line mode                                                           
+        if(true == largeFontMode)                                                     
+            Command_value |= (1 <<FUNCTION_CMD_FONT_BIT);   
+        }                                                                          
+    }                                                                              
+                                                                                   
+    LCD_Write_Command (Command_value);
+
+
 	return true;
 }
 
+
+void LCD_Set_CMD_Port_Out(unsigned bitsToWrite)
+{
+    if (bitsToWrite == ALL_BITS)
+    {
+        LCD_IO_CMD_DD |= (1 << LCD_IO_CMD_PORT_RS ) | (1 << LCD_IO_CMD_PORT_RW) | ( 1 << LCD_IO_CMD_PORT_EN); 
+    }
+    else
+    {
+        // ensure other bits are not changed
+        LCD_IO_CMD_DD |= bitsToWrite & ( (1 << LCD_IO_CMD_PORT_RS ) | (1 << LCD_IO_CMD_PORT_RW) | ( 1 << LCD_IO_CMD_PORT_EN) );
+    }
+}
+
+void LCD_Set_CMD_Port_In(unsigned bitsToWrite)
+{
+
+    if (bitsToWrite == ALL_BITS)
+    {
+        LCD_IO_CMD_DD &= ~ ( (1 << LCD_IO_CMD_PORT_RS ) | (1 << LCD_IO_CMD_PORT_RW) | ( 1 << LCD_IO_CMD_PORT_EN) ) ; 
+    }
+    else
+    {
+        // ensure other bits are not changed
+        LCD_IO_CMD_DD &= ~ (bitsToWrite & ( (1 << LCD_IO_CMD_PORT_RS ) | (1 << LCD_IO_CMD_PORT_RW) | ( 1 << LCD_IO_CMD_PORT_EN) ) );
+    }
+
+}
+
+unsigned LCD_Read_CMD_Port(unsigned bitsToBeRead )
+{
+	LCD_Wait();	
+    unsigned readVal = 0;
+    LCD_Set_CMD_Port_In(bitsToBeRead);
+    readVal = LCD_IO_CMD_PIN & ( (1 << LCD_IO_CMD_PORT_RS ) | (1 << LCD_IO_CMD_PORT_RW) | ( 1 << LCD_IO_CMD_PORT_EN) );
+    return readVal;
+
+}
+
+void LCD_Write_CMD_Port(unsigned bitsToWrite, bool setReset)
+{
+    if (setReset)
+    {
+        LCD_IO_CMD_PORT |=  bitsToWrite & ( (1 << LCD_IO_CMD_PORT_RS ) | (1 << LCD_IO_CMD_PORT_RW) | ( 1 << LCD_IO_CMD_PORT_EN) );
+    }
+    else
+    {
+
+        LCD_IO_CMD_PORT &= ~ (bitsToWrite & ( (1 << LCD_IO_CMD_PORT_RS ) | (1 << LCD_IO_CMD_PORT_RW) | ( 1 << LCD_IO_CMD_PORT_EN) ));
+    }
+}
 
 void LCD_Wait()
 {
 	// Retain the command port(port 1) values as it is
 	// set data port (port 2) to input mode
-	LCD_IO_CMD_PORT &= 0b11111110; 
-	LCD_IO_CMD_PORT |= (1 << LCD_RW); // set rw to 1 , for reading 
+    LCD_Set_CMD_Port_In( (1 << LCD_IO_CMD_PORT_RS) );
+    LCD_Write_CMD_Port( (1<< LCD_IO_CMD_PORT_RW) ,true);
 	
 	LCD_IO_DATA_DD = INPUT_MODE;
 	unsigned dataBus_val = (1 << LCD_BF);
@@ -33,28 +100,36 @@ void LCD_Wait()
 
 void LCD_Enable()
 {
-	LCD_IO_CMD_PORT |= (1 << LCD_EN);	
+    LCD_Write_CMD_Port( (1<< LCD_IO_CMD_PORT_EN), true);
 }
 
 
 void LCD_Disable()
 {
-	LCD_IO_CMD_PORT &= ~ (1 << LCD_EN);
+    LCD_Write_CMD_Port( (1<< LCD_IO_CMD_PORT_EN), false);
 }
 
 
 void LCD_Write_Command(unsigned char commandValue)
 {
 	LCD_Wait();	
+    LCD_Set_CMD_Port_Out(ALL_BITS);
+    LCD_Write_CMD_Port( (1 << LCD_IO_CMD_PORT_RS) , false);
+    LCD_Write_CMD_Port( (1 << LCD_IO_CMD_PORT_RW) , false);
+	LCD_Enable();
+    LCD_IO_DATA_DD = OUTPUT_MODE;
+	LCD_IO_DATA_PORT = dataValue;
+	LCD_Disable();
 }
 
 void LCD_Write_Data(unsigned char dataValue)
 {
 	LCD_Wait();
-	LCD_IO_CMD_DD = OUTPUT_MODE;
-	LCD_IO_CMD_PORT |= (1 << LCD_RS);
-	LCD_IO_CMD_PORT &= ~(1 << LCD_RW);
+    LCD_Set_CMD_Port_Out(ALL_BITS);
+    LCD_Write_CMD_Port( (1 << LCD_IO_CMD_PORT_RS) , true);
+    LCD_Write_CMD_Port( (1 << LCD_IO_CMD_PORT_RW) , false);
 	LCD_Enable();
+    LCD_IO_DATA_DD = OUTPUT_MODE;
 	LCD_IO_DATA_PORT = dataValue;
 	LCD_Disable();
 }
@@ -66,5 +141,49 @@ void LCD_Write_String(char text[])
 	{
 		LCD_Write_Data(text[idx]);
 		idx++;
+	}
+}
+
+void LCD_Clear()			// Clear the LCD display
+{
+	LCD_Write_Command (CLEAR_CMD);
+	_delay_ms(2);	// takes 1.5 ms to complete, so wait 
+}
+
+void LCD_Home()			// Set the cursor to the 'home' position
+{
+	LCD_Write_Command (HOME_CMD);
+	_delay_ms(2);	// takes 1.5 ms to complete, so wait 
+}
+
+void LCD_Display_ON_OFF(bool displayON, bool cursorON, bool cursorPositionON)
+{
+    unsigned commandValue = DISPLAY_CMD;
+    if (displayON) commandValue |= (1 << DISPLAY_CMD_DISPLAY_ON_BIT);
+    if (cursorON) commandValue |= (1 << DISPLAY_CMD_CURSOR_ON_BIT);
+    if (cursorPositionON) commandValue |= (1 << DISPLAY_CMD_CUR_POS_ON_BIT);
+
+    LCD_Write_Command(commandValue);
+} 
+
+
+
+void LCD_ShiftDisplay(bool shiftDisplayON , bool directionRight )
+{	
+    unsigned command Value = DISPLAY_SHIFT_CMD;
+    if (shiftDisplayON) commandValue |= (1<< DISPLAY_SHIFT_CMD_SHIFT_CONTROL_BIT);
+    if(directionRight) commandValue |= (1 <<DISPLAY_SHIFT_CMD_DIRECTION_BIT);
+    LCD_Write_Command(commandValue);
+}
+
+void LCD_SetCursorPosition(unsigned char iColumnPosition /*0 - 40 */, unsigned char iRowPosition /*0 for top row, 1 for bottom row*/)
+{
+	// Cursor position is achieved by repeatedly shifting from the home position.
+	// In two-line mode, the beginning of the second line is the 41st position (from home position)
+	unsigned char iTargetPosition = (40 * iRowPosition) + iColumnPosition;
+	LCD_Home();
+	for(unsigned char iPos = 0; iPos < iTargetPosition; iPos++)
+	{
+		LCD_Write_CommandOrData(true /*true = Command, false = Data*/, 0b00010100); // Shift cursor left one place
 	}
 }
