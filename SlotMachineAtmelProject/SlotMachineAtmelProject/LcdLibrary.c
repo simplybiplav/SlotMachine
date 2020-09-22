@@ -1,6 +1,6 @@
 #include "LcdLibrary.h"
 
-
+bool gTwoLineMode = false; 
 
 bool LCD_Init(bool twoLineMode, bool largeFontMode)
 {
@@ -12,11 +12,13 @@ bool LCD_Init(bool twoLineMode, bool largeFontMode)
     unsigned char Command_value = FUNCTION_CMD;   
     if(true == twoLineMode)                                                           
     {                                                                              
+        gTwoLineMode = true;
         Command_value |= (1 << FUNCTION_CMD_LINE_BIT);    
     }                                                                              
     else                                                                           
     {   // One-line mode                                                           
         if(true == largeFontMode)                                                     
+        {
             Command_value |= (1 <<FUNCTION_CMD_FONT_BIT);   
         }                                                                          
     }                                                                              
@@ -176,14 +178,22 @@ void LCD_ShiftDisplay(bool shiftDisplayON , bool directionRight )
     LCD_Write_Command(commandValue);
 }
 
-void LCD_SetCursorPosition(unsigned char iColumnPosition /*0 - 40 */, unsigned char iRowPosition /*0 for top row, 1 for bottom row*/)
+void LCD_SetCursorPosition(unsigned char columnPosition /*0 - 40 */, unsigned char rowPosition /*0 for top row, 1 for bottom row*/)
 {
-	// Cursor position is achieved by repeatedly shifting from the home position.
-	// In two-line mode, the beginning of the second line is the 41st position (from home position)
-	unsigned char iTargetPosition = (40 * iRowPosition) + iColumnPosition;
-	LCD_Home();
-	for(unsigned char iPos = 0; iPos < iTargetPosition; iPos++)
-	{
-		LCD_Write_CommandOrData(true /*true = Command, false = Data*/, 0b00010100); // Shift cursor left one place
-	}
+// Function Set 001(DL)NFXX
+//DL = interface data 8/4 bits
+// N = Number of Line
+// 00H to 4FH in one line mode
+// 00H to 27H in 1st line , 40H to 67H in 2nd line
+// F = Font Size 5*11 / 5*8
+//set DGRAM address 0b1(AC6-AC0)
+    if (true == gTwoLineMode)
+    {
+        LCD_Write_Command(DGRAM_CMD | (40 * rowPosition + columnPosition )); 
+    }
+    else
+    {
+        LCD_Write_Command(DGRAM_CMD | columnPosition ); 
+        targetPos = columnPosition;
+    }
 }
