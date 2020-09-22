@@ -1,6 +1,6 @@
 #include "KeyPad.h"
 
-extern unsigned char buttonPressed = CLEAR_BITS ;
+unsigned char buttonPressed = CLEAR_BITS ;
 void KP_Init()
 {
 	// EICRA  External Interrupt Control Register A

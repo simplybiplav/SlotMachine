@@ -1,5 +1,12 @@
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
 #include "SlotMachine.h"
 #include "LcdLibrary.h"
+#include "KeyPad.h"
+
+
+
 
 GameData gGameData;
 
@@ -14,9 +21,12 @@ void SM_Init()
     gGameData.winValue = 0;
     gGameData.spinReels = false;
     gGameData.stopGame = false;
-    gGameData.wheel1Pos = srand(rand()) % spinWheelValuesLength;
-    gGameData.wheel2Pos = srand(gGameData.wheel1Pos) % spinWheelValuesLength;
-    gGameData.wheel3Pos = srand(gGameData.wheel3Pos) % spinWheelValuesLength;
+	 srand((unsigned int) rand());
+    gGameData.wheel1Pos =  rand() % spinWheelValuesLength;
+	srand((unsigned int)gGameData.wheel1Pos);
+    gGameData.wheel2Pos = rand() % spinWheelValuesLength;
+	srand((unsigned int)gGameData.wheel2Pos);
+    gGameData.wheel3Pos = rand() % spinWheelValuesLength;
     SM_UpdateLCD();
     KP_Enable_Spin();
     KP_Enable_Bet();
@@ -41,8 +51,8 @@ uint16_t SM_WinValue()
             case SUMMATION_SYMBOL:
                 return SUMMATION_REWARD * gGameData.playerData.Bet;
             case PI_SYMBOL:
-                return PI_REWARD * gGameData.playerData.Bet;
-            case default:
+                return PI_REWARD * gGameData.playerData.Bet;	
+            default:
                 return 0;
         }
     }
@@ -55,7 +65,7 @@ void SM_UpdateLCDPlayerBet()
    char lcdString[10]= {'\0'};
    sprintf(lcdString,"%d",gGameData.playerData.Bet);
    LCD_SetCursorPosition( PLAYER_BET_CURSOR_COL , PLAYER_BET_CURSOR_ROW);
-   LCD_WriteString(lcdString);
+   LCD_Write_String(lcdString);
 }
 
 void SM_UpdateLCDPlayerBalance()
@@ -64,7 +74,7 @@ void SM_UpdateLCDPlayerBalance()
    char lcdString[10]= {'\0'};
    sprintf(lcdString,"%d",gGameData.playerData.Balance);
    LCD_SetCursorPosition( PLAYER_BALANCE_CURSOR_COL , PLAYER_BALANCE_CURSOR_ROW);
-   LCD_WriteString(lcdString);
+   LCD_Write_String(lcdString);
 }
 
 void SM_UpdateLCDReels()
@@ -74,7 +84,7 @@ void SM_UpdateLCDReels()
    reelValues[1] = spinWheelValues[gGameData.wheel2Pos]; 
    reelValues[2] = spinWheelValues[gGameData.wheel3Pos]; 
    LCD_SetCursorPosition( REEL_CURSOR_COL , REEL_CURSOR_ROW);
-   LCD_WriteString(reelValues);
+   LCD_Write_String(reelValues);
 }
 
 void SM_UpdateLCDWinValue()
@@ -83,7 +93,7 @@ void SM_UpdateLCDWinValue()
    char lcdString[10]= {'\0'};
    sprintf(lcdString,"%d",gGameData.winValue);
    LCD_SetCursorPosition( WIN_CURSOR_COL , WIN_CURSOR_ROW);
-   LCD_WriteString(lcdString);
+   LCD_Write_String(lcdString);
 }
 
 
@@ -200,6 +210,7 @@ ISR(INT0_vect) // Interrupt Handler for H/W INT 0
     KP_Enable_Spin();
 }
 
+/*
 
 ISR(INT1_vect) // Interrupt Handler for H/W INT 0
 {
@@ -217,3 +228,5 @@ ISR(INT2_vect) // Interrupt Handler for H/W INT 0
 	_delay_ms(80);		// Short delay to debounce the push-button
     KP_Enable_Bet_Max();
 }
+
+*/

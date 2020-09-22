@@ -1,6 +1,8 @@
 #ifndef _SLOT_MACHINE_H
 #define _SLOT_MACHINE_H
 
+#include <stdint.h>
+#include <stdbool.h>
 #define START_BALANCE 2000
 #define MAX_BET 3
 #define MIN_BET 1

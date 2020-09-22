@@ -23,7 +23,6 @@ PORT 2(0->7) will be connected to 7->14
 */
 #include <stdbool.h>
 #include "config.h"
-#include <avr/io.h>
 
 #if !defined(LCD_IO_CMD_PORT_LETTER) || !defined(LCD_IO_DATA_PORT_LETTER)
 #error "LCD_IO_CMD_PORT_LETTER and LCD_IO_DATA_PORT_LETTER not defined"
@@ -155,9 +154,9 @@ bool LCD_Init(bool twoLineMode ,
                 bool largeFontMode);
 
 
-void LCD_Set_CMD_Port_Out(unsigned bitsToWrite = ALL_BITS);
-void LCD_Set_CMD_Port_In(unsigned bitsToWrite = ALL_BITS);
-unsigned LCD_Read_CMD_Port(unsigned bitsToBeRead = ALL_BITS);
+void LCD_Set_CMD_Port_Out(unsigned bitsToWrite);
+void LCD_Set_CMD_Port_In(unsigned bitsToWrite);
+unsigned LCD_Read_CMD_Port(unsigned bitsToBeRead);
 void LCD_Write_CMD_Port(unsigned bitsToWrite,bool setReset);
 void LCD_Write_Command(unsigned char commandValue);
 void LCD_Write_Data(unsigned char dataValue);
@@ -169,12 +168,13 @@ void LCD_Display_ON_OFF(bool displayON, bool cursorON, bool cursorPositionON);
 void LCD_Clear();
 void LCD_Home();
 void LCD_ShiftDisplay(bool shiftDisplayON , bool directionRight );
+void LCD_SetCursorPosition(unsigned char columnPosition /*0 - 40 */, unsigned char rowPosition /*0 for top row, 1 for bottom row*/);
 // *** END of 'Private' Functions accessed by other member functions - do not call these direct from application code ***
 
 #if 0
 // *** USER functions
 void LCD_WriteChar(unsigned char cValue);
-void LCD_SetCursorPosition(unsigned char iColumnPosition /*0 - 40 */, unsigned char iRowPosition /*0 for top row, 1 for bottom row*/);
+
 void LCD_WriteString(char Text[]);
 
 #endif 

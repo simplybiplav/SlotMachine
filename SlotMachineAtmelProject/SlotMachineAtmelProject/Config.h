@@ -9,6 +9,9 @@
 #ifndef CONFIG_H_
 #define CONFIG_H_
 
+#include <avr/io.h>
+#define F_CPU 8000000UL
+#include <util/delay.h>
 #define LCD_IO_CMD_PORT_LETTER A
 #define LCD_IO_CMD_PORT_RS 0
 #define LCD_IO_CMD_PORT_RW 1

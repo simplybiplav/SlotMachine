@@ -4,7 +4,7 @@ bool gTwoLineMode = false;
 
 bool LCD_Init(bool twoLineMode, bool largeFontMode)
 {
-    LCD_Set_CMD_Port_Out();
+    LCD_Set_CMD_Port_Out(ALL_BITS);
     LCD_Write_CMD_Port(ALL_BITS, false); //clear bits
 	LCD_IO_DATA_DD = OUTPUT_MODE; // configure i/o port 2 for output
 	LCD_IO_DATA_PORT = CLEAR_BITS; // clear i/o port 1
@@ -120,7 +120,7 @@ void LCD_Write_Command(unsigned char commandValue)
     LCD_Write_CMD_Port( (1 << LCD_IO_CMD_PORT_RW) , false);
 	LCD_Enable();
     LCD_IO_DATA_DD = OUTPUT_MODE;
-	LCD_IO_DATA_PORT = dataValue;
+	LCD_IO_DATA_PORT = commandValue;
 	LCD_Disable();
 }
 
@@ -172,7 +172,7 @@ void LCD_Display_ON_OFF(bool displayON, bool cursorON, bool cursorPositionON)
 
 void LCD_ShiftDisplay(bool shiftDisplayON , bool directionRight )
 {	
-    unsigned command Value = DISPLAY_SHIFT_CMD;
+    unsigned commandValue = DISPLAY_SHIFT_CMD;
     if (shiftDisplayON) commandValue |= (1<< DISPLAY_SHIFT_CMD_SHIFT_CONTROL_BIT);
     if(directionRight) commandValue |= (1 <<DISPLAY_SHIFT_CMD_DIRECTION_BIT);
     LCD_Write_Command(commandValue);
@@ -194,6 +194,5 @@ void LCD_SetCursorPosition(unsigned char columnPosition /*0 - 40 */, unsigned ch
     else
     {
         LCD_Write_Command(DGRAM_CMD | columnPosition ); 
-        targetPos = columnPosition;
     }
 }
