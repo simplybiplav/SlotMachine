@@ -17,6 +17,10 @@ void SM_Init()
     gGameData.wheel1Pos = srand(rand()) % spinWheelValuesLength;
     gGameData.wheel2Pos = srand(gGameData.wheel1Pos) % spinWheelValuesLength;
     gGameData.wheel3Pos = srand(gGameData.wheel3Pos) % spinWheelValuesLength;
+    SM_UpdateLCD();
+    KP_Enable_Spin();
+    KP_Enable_Bet();
+    KP_Enable_Bet_Max();
 }
 
 
@@ -82,17 +86,12 @@ void SM_UpdateLCDWinValue()
    LCD_WriteString(lcdString);
 }
 
-void SM_UpdateLCD()
-{
-    SM_UpdateLCDPlayerBet();
-    SM_UpdateLCDPlayerBalance();
-    SM_UpdateLCDReels();
-    SM_UpdateLCDWinValue();
-} 
 
 void SM_SpinWheel()
 {
     gGameData.spinReels = true; 
+    KP_Disable_Bet();
+    KP_Disable_Bet_Max();
     while(true == gGameData.spinReels)
     {
        gGameData.wheel1Pos = ( gGameData.wheel1Pos + 1 ) %spinWheelValuesLength;
@@ -125,18 +124,80 @@ void SM_SpinWheel()
     }
     gGameData.winValue = SM_WinValue();
     SM_UpdateLCD();
+    KP_Enable_Bet();
+    KP_Enable_Bet_Max();
 }
 
 void SM_StopWheel()
 {
     gGameData.spinReels = false;
 }
+
+
+void SM_UpdateLCD()
+{
+    SM_UpdateLCDTexts();
+    SM_UpdateLCDValue();
+}
+ 
+
 void SM_UpdateLCDValue()
 {
-
+    SM_UpdateLCDPlayerBet();
+    SM_UpdateLCDPlayerBalance();
+    SM_UpdateLCDReels();
+    SM_UpdateLCDWinValue();
 }
 
 void SM_UpdateLCDTexts()
 {
 
+}
+
+void SM_ToggleSpin()
+{
+    gGameData.spinReels = ~ gGameData.spinReels;
+}
+void SM_BetMax()
+{
+    gGameData.playerData.Bet = MAX_BET; 
+}
+
+void SM_IncreaseBet()
+{
+    if (gGameData.playerData.Bet == MAX_BET)
+    {
+        gGameData.playerData.Bet = MIN_BET;
+    }
+    else
+    {
+        gGameData.playerData.Bet += 1;
+    }
+}
+
+
+ISR(INT0_vect) // Interrupt Handler for H/W INT 0
+{
+	KP_Disable_Spin();	
+    SM_ToggleSpin();
+	_delay_ms(80);		// Short delay to debounce the push-button
+    KP_Enable_Spin();
+}
+
+
+ISR(INT1_vect) // Interrupt Handler for H/W INT 0
+{
+	KP_Disable_Bet();	
+    SM_IncreaseBet();
+	_delay_ms(80);		// Short delay to debounce the push-button
+    KP_Enable_Bet();
+}
+
+
+ISR(INT2_vect) // Interrupt Handler for H/W INT 0
+{
+	KP_Disable_Bet_Max();	
+    SM_BetMax();
+	_delay_ms(80);		// Short delay to debounce the push-button
+    KP_Enable_Bet_Max();
 }

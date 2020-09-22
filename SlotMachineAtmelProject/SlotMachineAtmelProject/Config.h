@@ -14,6 +14,7 @@
 #define LCD_IO_CMD_PORT_RW 1
 #define LCD_IO_CMD_PORT_EN 2
 #define LCD_IO_DATA_PORT_LETTER B
+#define KEYPAD_PORT_LETTER D
 
 #define INPUT_MODE 0x00
 #define OUTPUT_MODE 0xFF

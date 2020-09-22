@@ -1,9 +1,9 @@
-
 #ifndef _SLOT_MACHINE_H
 #define _SLOT_MACHINE_H
 
 #define START_BALANCE 2000
 #define MAX_BET 3
+#define MIN_BET 1
 
 #define MAX_WIN_BALANCE 10000
 
@@ -48,7 +48,9 @@ typedef struct _gameData {
 
 extern GameData gGameData;
 
-
+void SM_ToggleSpin();
+void SM_BetMax();
+void SM_IncreaseBet();
 void SM_Init();
 uint16_t SM_WinValue();
 void SM_UpdateLCDPlayerBet();
