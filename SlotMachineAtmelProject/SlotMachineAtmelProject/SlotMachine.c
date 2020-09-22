@@ -112,6 +112,11 @@ void SM_SpinWheel()
         {
             gGameData.playerData.Balance = 0;
         }
+        if ( 0 == gGameData.playerData.Balance)
+        {
+            
+            SM_GameOver();
+        }
     }
     else
     {
@@ -119,6 +124,7 @@ void SM_SpinWheel()
         if (gGameData.playerData.Balance >= MAX_WIN_BALANCE)
         {
             gGameData.playerData.Balance = MAX_WIN_BALANCE;
+            SM_Winner();
         } 
 
     }
@@ -175,6 +181,16 @@ void SM_IncreaseBet()
     }
 }
 
+void SM_Winner()
+{
+
+}
+
+void SM_GameOver()
+{
+
+
+}
 
 ISR(INT0_vect) // Interrupt Handler for H/W INT 0
 {

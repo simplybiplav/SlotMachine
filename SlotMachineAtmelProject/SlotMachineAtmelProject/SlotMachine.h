@@ -62,4 +62,6 @@ void SM_UpdateLCDTexts();
 void SM_UpdateLCDWinValue();
 void SM_SpinWheel();
 void SM_StopWheel();
+void SM_Winner();
+void SM_GameOver();
 #endif
