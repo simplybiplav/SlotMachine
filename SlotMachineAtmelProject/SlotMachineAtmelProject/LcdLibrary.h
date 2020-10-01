@@ -30,9 +30,9 @@ PORT 2(0->7) will be connected to 7->14
 
 #define HASH_SYMBOL 0x23
 #define DOLLAR_SYMBOL 0x24 
-#define SUMMATION_SYMBOL 0xF7
-#define PI_SYMBOL 0xF8
-#define YEN_SYMBOL 0x55
+#define SUMMATION_SYMBOL 0xF6
+#define PI_SYMBOL 0xF7
+#define YEN_SYMBOL 0x5C
 
 // RS = 0 and RW= 0 for command
 #define CLEAR_CMD     0b00000001 //write time 1.52 ms  
@@ -171,13 +171,6 @@ void LCD_ShiftDisplay(bool shiftDisplayON , bool directionRight );
 void LCD_SetCursorPosition(unsigned char columnPosition /*0 - 40 */, unsigned char rowPosition /*0 for top row, 1 for bottom row*/);
 // *** END of 'Private' Functions accessed by other member functions - do not call these direct from application code ***
 
-#if 0
-// *** USER functions
-void LCD_WriteChar(unsigned char cValue);
-
-void LCD_WriteString(char Text[]);
-
-#endif 
 
 
 #endif

@@ -10,7 +10,7 @@
 
 GameData gGameData;
 
-char spinWheelValues[] = { DOLLAR_SYMBOL,0,1,YEN_SYMBOL,3,4,PI_SYMBOL,HASH_SYMBOL,5,6,SUMMATION_SYMBOL,7,1,0,9,8,3,8,4,5,6,9};
+char spinWheelValues[] = { DOLLAR_SYMBOL,'0','1',YEN_SYMBOL,'3','4',PI_SYMBOL,HASH_SYMBOL,'5','6',SUMMATION_SYMBOL,'7','1','0','9','8','3','8','4','5','6','9'};
 
 #define spinWheelValuesLength sizeof(spinWheelValues)/sizeof(char)
 
@@ -96,10 +96,24 @@ void SM_UpdateLCDWinValue()
    LCD_Write_String(lcdString);
 }
 
+void CheckPinSignal()
+{
+	DDRE &= ~ 0b00010000;
+	if (PINE & (1<<PINE4))
+	{
+		gGameData.spinReels = true;
+	}
+	else
+	{
+		gGameData.spinReels = false;
+	}
+}
 
 void SM_SpinWheel()
 {
-    gGameData.spinReels = true; 
+    //gGameData.spinReels = true;
+	CheckPinSignal(); 
+	if(false == gGameData.spinReels) return;
     KP_Disable_Bet();
     KP_Disable_Bet_Max();
     while(true == gGameData.spinReels)
@@ -109,6 +123,7 @@ void SM_SpinWheel()
        gGameData.wheel3Pos = ( gGameData.wheel3Pos + 1 ) %spinWheelValuesLength;
         SM_UpdateLCDReels();
        _delay_ms(10);
+	   CheckPinSignal();
     }
     
     gGameData.winValue = SM_WinValue();
@@ -167,12 +182,32 @@ void SM_UpdateLCDValue()
 
 void SM_UpdateLCDTexts()
 {
-
+	LCD_SetCursorPosition( WIN_TEXT_COL , WIN_TEXT_ROW);
+	LCD_Write_String(WIN_TEXT);
+   
+	LCD_SetCursorPosition( PLAYER_BET_TEXT_COL ,PLAYER_BET_TEXT_ROW);
+	LCD_Write_String(PLAYER_BET_TEXT);
+	
+	LCD_SetCursorPosition( PLAYER_BALANCE_TEXT_COL ,PLAYER_BALANCE_TEXT_ROW);
+	LCD_Write_String(PLAYER_BALANCE_TEXT);
+	
+	LCD_SetCursorPosition(REEL_TEXT_LEFT_COL,REEL_TEXT_LEFT_ROW);
+	LCD_Write_Data(REEL_TEXT_LEFT);
+	
+	LCD_SetCursorPosition(REEL_TEXT_RIGHT_COL,REEL_TEXT_RIGHT_ROW);
+	LCD_Write_Data(REEL_TEXT_RIGHT);
 }
 
 void SM_ToggleSpin()
 {
-    gGameData.spinReels = ~ gGameData.spinReels;
+   if( true == gGameData.spinReels )
+   {
+		gGameData.spinReels = false;
+   }
+   else
+   {
+	   gGameData.spinReels = true;
+   }
 }
 void SM_BetMax()
 {

@@ -9,7 +9,7 @@ bool LCD_Init(bool twoLineMode, bool largeFontMode)
 	LCD_IO_DATA_DD = OUTPUT_MODE; // configure i/o port 2 for output
 	LCD_IO_DATA_PORT = CLEAR_BITS; // clear i/o port 1
 
-    unsigned char Command_value = FUNCTION_CMD;   
+    unsigned char Command_value = FUNCTION_CMD | (1<<FUNCTION_CMD_INTERFACE_BIT);   
     if(true == twoLineMode)                                                           
     {                                                                              
         gTwoLineMode = true;
@@ -85,8 +85,9 @@ void LCD_Wait()
 {
 	// Retain the command port(port 1) values as it is
 	// set data port (port 2) to input mode
-    LCD_Set_CMD_Port_In( (1 << LCD_IO_CMD_PORT_RS) );
+    //LCD_Set_CMD_Port_In( (1 << LCD_IO_CMD_PORT_RS) );
     LCD_Write_CMD_Port( (1<< LCD_IO_CMD_PORT_RW) ,true);
+	LCD_Write_CMD_Port( (1<< LCD_IO_CMD_PORT_RS) ,false);
 	
 	LCD_IO_DATA_DD = INPUT_MODE;
 	unsigned dataBus_val = (1 << LCD_BF);
@@ -102,12 +103,14 @@ void LCD_Wait()
 
 void LCD_Enable()
 {
-    LCD_Write_CMD_Port( (1<< LCD_IO_CMD_PORT_EN), true);
+	PORTG |= 0b00000100;
+   // LCD_Write_CMD_Port( (1<< LCD_IO_CMD_PORT_EN), true);
 }
 
 
 void LCD_Disable()
 {
+	PORTG &= 0b11111011;
     LCD_Write_CMD_Port( (1<< LCD_IO_CMD_PORT_EN), false);
 }
 
@@ -115,7 +118,7 @@ void LCD_Disable()
 void LCD_Write_Command(unsigned char commandValue)
 {
 	LCD_Wait();	
-    LCD_Set_CMD_Port_Out(ALL_BITS);
+    //LCD_Set_CMD_Port_Out(ALL_BITS);
     LCD_Write_CMD_Port( (1 << LCD_IO_CMD_PORT_RS) , false);
     LCD_Write_CMD_Port( (1 << LCD_IO_CMD_PORT_RW) , false);
 	LCD_Enable();
@@ -127,9 +130,11 @@ void LCD_Write_Command(unsigned char commandValue)
 void LCD_Write_Data(unsigned char dataValue)
 {
 	LCD_Wait();
-    LCD_Set_CMD_Port_Out(ALL_BITS);
-    LCD_Write_CMD_Port( (1 << LCD_IO_CMD_PORT_RS) , true);
-    LCD_Write_CMD_Port( (1 << LCD_IO_CMD_PORT_RW) , false);
+    //LCD_Set_CMD_Port_Out(ALL_BITS);
+    //LCD_Write_CMD_Port( (1 << LCD_IO_CMD_PORT_RS) , true);
+    //LCD_Write_CMD_Port( (1 << LCD_IO_CMD_PORT_RW) , false);
+	PORTG |= 0b00000001;	// Set Register Select HIGH for data mode (PortG bit0)
+	PORTG &= 0b11111101;
 	LCD_Enable();
     LCD_IO_DATA_DD = OUTPUT_MODE;
 	LCD_IO_DATA_PORT = dataValue;
@@ -189,7 +194,7 @@ void LCD_SetCursorPosition(unsigned char columnPosition /*0 - 40 */, unsigned ch
 //set DGRAM address 0b1(AC6-AC0)
     if (true == gTwoLineMode)
     {
-        LCD_Write_Command(DGRAM_CMD | (40 * rowPosition + columnPosition )); 
+        LCD_Write_Command(DGRAM_CMD | (0x40 * rowPosition + columnPosition )); 
     }
     else
     {

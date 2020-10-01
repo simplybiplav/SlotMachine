@@ -13,14 +13,33 @@
 #define REEL_CURSOR_COL  12
 
 #define WIN_CURSOR_ROW  LCD_ROW_2
-#define WIN_CURSOR_COL  12
+#define WIN_CURSOR_COL  4
 
 #define PLAYER_BALANCE_CURSOR_ROW LCD_ROW_1
-#define PLAYER_BALANCE_CURSOR_COL 10
+#define PLAYER_BALANCE_CURSOR_COL 11
 
 #define PLAYER_BET_CURSOR_ROW LCD_ROW_1
-#define PLAYER_BET_CURSOR_COL 0
+#define PLAYER_BET_CURSOR_COL 4
 
+#define REEL_TEXT_LEFT 0x7E
+#define REEL_TEXT_LEFT_ROW  LCD_ROW_2
+#define REEL_TEXT_LEFT_COL  11
+
+#define REEL_TEXT_RIGHT 0x7F
+#define REEL_TEXT_RIGHT_ROW  LCD_ROW_2
+#define REEL_TEXT_RIGHT_COL  15
+
+#define WIN_TEXT "Won:"
+#define WIN_TEXT_ROW  LCD_ROW_2
+#define WIN_TEXT_COL  0
+
+#define PLAYER_BALANCE_TEXT "Bal:"
+#define PLAYER_BALANCE_TEXT_ROW LCD_ROW_1
+#define PLAYER_BALANCE_TEXT_COL 7
+
+#define PLAYER_BET_TEXT "Bet:"
+#define PLAYER_BET_TEXT_ROW LCD_ROW_1
+#define PLAYER_BET_TEXT_COL 0
 
 
 #define DOLLAR_REWARD  5 
@@ -40,7 +59,7 @@ typedef struct _playerData {
 typedef struct _gameData {
     PlayerData playerData;
     uint16_t winValue;
-    bool spinReels;
+    volatile bool spinReels;
     bool stopGame;
     unsigned wheel1Pos;
     unsigned wheel2Pos;

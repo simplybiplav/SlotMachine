@@ -6,7 +6,7 @@ void KP_Init()
 	// EICRA  External Interrupt Control Register A
 	// Bits 7:0  ISC31, ISC30  ISC00, ISC00: External Interrupt 3 - 0 Sense Control Bits
 	// 10  = The falling edge of INTn generates asynchronously an interrupt request
-	EICRA = 0b00000010;		// Interrupt Sense (INT0) falling-edge triggered
+	EICRA = 0b00001010;		// Interrupt Sense (INT0) falling-edge triggered
 	
 	// EICRB  External Interrupt Control Register B
 	// Bits 7:0  ISC71, ISC70 - ISC41, ISC40: External Interrupt 7 - 4 Sense Control Bits

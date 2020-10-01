@@ -10,13 +10,13 @@
 #define CONFIG_H_
 
 #include <avr/io.h>
-#define F_CPU 8000000UL
+#define F_CPU 1000000UL
 #include <util/delay.h>
-#define LCD_IO_CMD_PORT_LETTER A
+#define LCD_IO_CMD_PORT_LETTER G
 #define LCD_IO_CMD_PORT_RS 0
 #define LCD_IO_CMD_PORT_RW 1
 #define LCD_IO_CMD_PORT_EN 2
-#define LCD_IO_DATA_PORT_LETTER B
+#define LCD_IO_DATA_PORT_LETTER A
 #define KEYPAD_PORT_LETTER D
 
 #define INPUT_MODE 0x00
