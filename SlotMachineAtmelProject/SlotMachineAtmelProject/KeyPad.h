@@ -2,6 +2,7 @@
 #define _KEY_PAD_H
 
 #include "Config.h"
+#include <avr/interrupt.h>
 
 #define KEYPAD_DD PORT_LETTER_TO_DD(KEYPAD_PORT_LETTER)
 #define KEYPAD_PORT PORT_LETTER_TO_PORT(KEYPAD_PORT_LETTER)

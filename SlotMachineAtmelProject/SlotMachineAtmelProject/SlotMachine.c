@@ -10,8 +10,9 @@
 
 GameData gGameData;
 
-char spinWheelValues[] = { DOLLAR_SYMBOL,'0','1',YEN_SYMBOL,'3','4',PI_SYMBOL,HASH_SYMBOL,'5','6',SUMMATION_SYMBOL,'7','1','0','9','8','3','8','4','5','6','9'};
-
+//char spinWheelValues[] = { DOLLAR_SYMBOL,'0','1',YEN_SYMBOL,'3','4',PI_SYMBOL,HASH_SYMBOL,'5','6',SUMMATION_SYMBOL,'2','7','9','8'};
+//char spinWheelValues[] = { DOLLAR_SYMBOL,YEN_SYMBOL,PI_SYMBOL,HASH_SYMBOL,SUMMATION_SYMBOL};
+char spinWheelValues[] = { DOLLAR_SYMBOL,YEN_SYMBOL,PI_SYMBOL};
 #define spinWheelValuesLength sizeof(spinWheelValues)/sizeof(char)
 
 void SM_Init()
@@ -19,7 +20,7 @@ void SM_Init()
     gGameData.playerData.Bet = 1;
     gGameData.playerData.Balance = START_BALANCE;
     gGameData.winValue = 0;
-    gGameData.spinReels = false;
+    spinReels = SPIN_OFF;
     gGameData.stopGame = false;
 	 srand((unsigned int) rand());
     gGameData.wheel1Pos =  rand() % spinWheelValuesLength;
@@ -28,9 +29,10 @@ void SM_Init()
 	srand((unsigned int)gGameData.wheel2Pos);
     gGameData.wheel3Pos = rand() % spinWheelValuesLength;
     SM_UpdateLCD();
+	KP_Init();
     KP_Enable_Spin();
     KP_Enable_Bet();
-    KP_Enable_Bet_Max();
+//    KP_Enable_Bet_Max();
 }
 
 
@@ -98,34 +100,46 @@ void SM_UpdateLCDWinValue()
 
 void CheckPinSignal()
 {
+	return;
 	DDRE &= ~ 0b00010000;
 	if (PINE & (1<<PINE4))
 	{
-		gGameData.spinReels = true;
+		spinReels = SPIN_ON;
 	}
 	else
 	{
-		gGameData.spinReels = false;
+		spinReels = SPIN_OFF;
 	}
 }
 
 void SM_SpinWheel()
 {
     //gGameData.spinReels = true;
+	KP_Enable_Spin();
+	int count = 1;
 	CheckPinSignal(); 
-	if(false == gGameData.spinReels) return;
+	if(SPIN_OFF == spinReels) return;
     KP_Disable_Bet();
     KP_Disable_Bet_Max();
-    while(true == gGameData.spinReels)
+    while(SPIN_ON == spinReels)
     {
+	   KP_Enable_Spin(); 	
        gGameData.wheel1Pos = ( gGameData.wheel1Pos + 1 ) %spinWheelValuesLength;
-       gGameData.wheel2Pos = ( gGameData.wheel2Pos + 1 ) %spinWheelValuesLength;
-       gGameData.wheel3Pos = ( gGameData.wheel3Pos + 1 ) %spinWheelValuesLength;
+       if (count % 2 == 0) gGameData.wheel2Pos = ( gGameData.wheel2Pos + 1 ) %spinWheelValuesLength;
+       if (count % 3 == 0) gGameData.wheel3Pos = ( gGameData.wheel3Pos + 1 ) %spinWheelValuesLength;
+	   count++;
+	   if (count >= 3) count = 1;
         SM_UpdateLCDReels();
-       _delay_ms(10);
+       _delay_ms(100);
 	   CheckPinSignal();
     }
     
+#if 1
+    gGameData.wheel1Pos = 2;
+    gGameData.wheel2Pos = 2;
+    gGameData.wheel3Pos = 2;
+	SM_UpdateLCDReels();
+#endif
     gGameData.winValue = SM_WinValue();
     if (gGameData.winValue == 0 )
     {
@@ -153,7 +167,6 @@ void SM_SpinWheel()
         } 
 
     }
-    gGameData.winValue = SM_WinValue();
     SM_UpdateLCD();
     KP_Enable_Bet();
     KP_Enable_Bet_Max();
@@ -161,7 +174,7 @@ void SM_SpinWheel()
 
 void SM_StopWheel()
 {
-    gGameData.spinReels = false;
+    spinReels = SPIN_OFF;
 }
 
 
@@ -200,13 +213,13 @@ void SM_UpdateLCDTexts()
 
 void SM_ToggleSpin()
 {
-   if( true == gGameData.spinReels )
+   if( SPIN_ON == spinReels )
    {
-		gGameData.spinReels = false;
+		spinReels = SPIN_OFF;
    }
    else
    {
-	   gGameData.spinReels = true;
+	   spinReels = SPIN_ON;
    }
 }
 void SM_BetMax()
@@ -237,25 +250,7 @@ void SM_GameOver()
 
 }
 
-ISR(INT0_vect) // Interrupt Handler for H/W INT 0
-{
-	KP_Disable_Spin();	
-    SM_ToggleSpin();
-	_delay_ms(80);		// Short delay to debounce the push-button
-    KP_Enable_Spin();
-}
-
 /*
-
-ISR(INT1_vect) // Interrupt Handler for H/W INT 0
-{
-	KP_Disable_Bet();	
-    SM_IncreaseBet();
-	_delay_ms(80);		// Short delay to debounce the push-button
-    KP_Enable_Bet();
-}
-
-
 ISR(INT2_vect) // Interrupt Handler for H/W INT 0
 {
 	KP_Disable_Bet_Max();	

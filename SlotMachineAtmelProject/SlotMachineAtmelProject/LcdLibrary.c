@@ -103,14 +103,14 @@ void LCD_Wait()
 
 void LCD_Enable()
 {
-	PORTG |= 0b00000100;
-   // LCD_Write_CMD_Port( (1<< LCD_IO_CMD_PORT_EN), true);
+	//PORTG |= 0b00000100;
+   LCD_Write_CMD_Port( (1<< LCD_IO_CMD_PORT_EN), true);
 }
 
 
 void LCD_Disable()
 {
-	PORTG &= 0b11111011;
+	//PORTG &= 0b11111011;
     LCD_Write_CMD_Port( (1<< LCD_IO_CMD_PORT_EN), false);
 }
 

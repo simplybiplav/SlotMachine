@@ -7,6 +7,9 @@
 #define MAX_BET 3
 #define MIN_BET 1
 
+#define SPIN_ON 1
+#define SPIN_OFF 0
+
 #define MAX_WIN_BALANCE 10000
 
 #define REEL_CURSOR_ROW  LCD_ROW_2
@@ -51,7 +54,7 @@
 
 typedef struct _playerData {
     uint16_t Balance;
-    uint16_t Bet;
+    volatile uint16_t Bet;
 } PlayerData;
 
 
@@ -59,14 +62,14 @@ typedef struct _playerData {
 typedef struct _gameData {
     PlayerData playerData;
     uint16_t winValue;
-    volatile bool spinReels;
-    bool stopGame;
+    volatile bool stopGame;
     unsigned wheel1Pos;
     unsigned wheel2Pos;
     unsigned wheel3Pos;
 
 } GameData;
 
+volatile unsigned char spinReels;
 extern GameData gGameData;
 
 void SM_ToggleSpin();
