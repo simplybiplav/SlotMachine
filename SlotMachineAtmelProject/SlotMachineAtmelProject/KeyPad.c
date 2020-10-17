@@ -31,39 +31,38 @@ void KP_Init()
 	EIMSK = 0b00000011;		// Enable INT1, INT0
 	EIFR = 0b00000011;
 #endif
-	DDRD = 0x00;
-    //KEYPAD_DD = INPUT_MODE;
+    KEYPAD_DD = INPUT_MODE;
     //sei();
 
 }
 
 void KP_Enable_Spin()
 {
-	//return;
+	EIFR |= 0b00000001;
 	EIMSK |= (1<< KEY_SPIN);
 }
 void KP_Enable_Bet()
 {
-//return;
+	EIFR |= 0b00000010;
 	EIMSK |= (1<< KEY_BET);
 }
 
 void KP_Enable_Bet_Max()
 {
 	return;
+	/* unimplemented
 	EIMSK |= (1<< KEY_BET_MAX);
+	*/
 
 }
 
 void KP_Disable_Spin()
 {
-//return;
 	EIMSK &= ~(1<< KEY_SPIN);
 }
 
 void KP_Disable_Bet()
 {
-	//return;
 	EIMSK &= ~(1<< KEY_BET);
 
 }
@@ -71,7 +70,9 @@ void KP_Disable_Bet()
 void KP_Disable_Bet_Max()
 {
 	return;
+		/* unimplemented
 	EIMSK &= ~(1<< KEY_BET_MAX);
+	*/
 
 }
 

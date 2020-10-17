@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+
+
 #define START_BALANCE 2000
 #define MAX_BET 3
 #define MIN_BET 1
@@ -19,7 +21,7 @@
 #define WIN_CURSOR_COL  4
 
 #define PLAYER_BALANCE_CURSOR_ROW LCD_ROW_1
-#define PLAYER_BALANCE_CURSOR_COL 11
+#define PLAYER_BALANCE_CURSOR_COL 10
 
 #define PLAYER_BET_CURSOR_ROW LCD_ROW_1
 #define PLAYER_BET_CURSOR_COL 4
@@ -38,19 +40,40 @@
 
 #define PLAYER_BALANCE_TEXT "Bal:"
 #define PLAYER_BALANCE_TEXT_ROW LCD_ROW_1
-#define PLAYER_BALANCE_TEXT_COL 7
+#define PLAYER_BALANCE_TEXT_COL 6
 
 #define PLAYER_BET_TEXT "Bet:"
 #define PLAYER_BET_TEXT_ROW LCD_ROW_1
 #define PLAYER_BET_TEXT_COL 0
 
 
-#define DOLLAR_REWARD  5 
+#define IDLE_TEXT "Press To Start"
+#define IDLE_TEXT_ROW LCD_ROW_1
+#define IDLE_TEXT_COL 0
+
+#define YOU_WON_TEXT "YOU WON"
+#define YOU_WON_TEXT_ROW LCD_ROW_1
+#define YOU_WON_TEXT_COL 5
+
+#define GAMEOVER_TEXT "GAMEOVER"
+#define GAMEOVER_TEXT_ROW LCD_ROW_1
+#define GAMEOVER_TEXT_COL 4
+
+#define SPIN_DELAY	100
+#define DISPLAY_BANNER_DELAY 10000
+
+#define IDLE_TIME_OUT_VALUE 10
+
+#define DOLLAR_REWARD  10 
 #define YEN_REWARD  20 
 #define HASH_REWARD  30 
-#define SEVEN_REWARD  50 
-#define SUMMATION_REWARD  70 
+#define SUMMATION_REWARD  50 
 #define PI_REWARD  100 
+
+#define DOUBLE_MATCH_REWARD 5
+
+
+typedef enum _gameState {SM_INIT, SM_USER_WAIT, SM_IDLE_TIMER_START, SM_SPIN, SM_IDLE} GameState;
 
 typedef struct _playerData {
     uint16_t Balance;
@@ -66,11 +89,16 @@ typedef struct _gameData {
     unsigned wheel1Pos;
     unsigned wheel2Pos;
     unsigned wheel3Pos;
+	volatile GameState smState;
 
 } GameData;
 
 volatile unsigned char spinReels;
+extern volatile unsigned int idleTimeOut;
 extern GameData gGameData;
+
+
+void SM_InitGameData();
 
 void SM_ToggleSpin();
 void SM_BetMax();
@@ -88,4 +116,21 @@ void SM_SpinWheel();
 void SM_StopWheel();
 void SM_Winner();
 void SM_GameOver();
+void SM_Idle();
+void SM_InitialiseIdleTimer();
+void SM_EnableIdleTimer();
+void SM_DisableIdleTimer();
+
+void SM_BetPressedLights();
+void SM_SpinPressedLights();
+void SM_SpinningLights();
+void SM_UserWaitLights();
+void SM_WinnerLights();
+void SM_GameOverLights();
+void SM_BetWonLights();
+void SM_SystemBusyLights();
+void SM_IdleLights();
+void SM_LightsOff();
+
+
 #endif

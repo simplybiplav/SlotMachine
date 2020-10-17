@@ -12,7 +12,6 @@
 #define KEY_BET 1
 #define KEY_BET_MAX 2
 
-
 extern unsigned char buttonPressed;
 void KP_Init();
 void KP_Enable_Spin();
