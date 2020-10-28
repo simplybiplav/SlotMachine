@@ -169,7 +169,6 @@ void LCD_Clear();
 void LCD_Home();
 void LCD_ShiftDisplay(bool shiftDisplayON , bool directionRight );
 void LCD_SetCursorPosition(unsigned char columnPosition /*0 - 40 */, unsigned char rowPosition /*0 for top row, 1 for bottom row*/);
-// *** END of 'Private' Functions accessed by other member functions - do not call these direct from application code ***
 
 
 

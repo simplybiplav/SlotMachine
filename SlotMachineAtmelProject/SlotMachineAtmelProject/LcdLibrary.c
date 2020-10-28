@@ -131,12 +131,12 @@ void LCD_Write_Data(unsigned char dataValue)
 {
 	LCD_Wait();
     //LCD_Set_CMD_Port_Out(ALL_BITS);
-    //LCD_Write_CMD_Port( (1 << LCD_IO_CMD_PORT_RS) , true);
-    //LCD_Write_CMD_Port( (1 << LCD_IO_CMD_PORT_RW) , false);
-	PORTG |= 0b00000001;	// Set Register Select HIGH for data mode (PortG bit0)
-	PORTG &= 0b11111101;
+    	LCD_Write_CMD_Port( (1 << LCD_IO_CMD_PORT_RS) , true);
+    	LCD_Write_CMD_Port( (1 << LCD_IO_CMD_PORT_RW) , false);
+	//PORTG |= 0b00000001;	// Set Register Select HIGH for data mode (PortG bit0)
+	//PORTG &= 0b11111101;
 	LCD_Enable();
-    LCD_IO_DATA_DD = OUTPUT_MODE;
+    	LCD_IO_DATA_DD = OUTPUT_MODE;
 	LCD_IO_DATA_PORT = dataValue;
 	LCD_Disable();
 }

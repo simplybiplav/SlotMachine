@@ -116,25 +116,11 @@ void SM_UpdateLCDWinValue()
    LCD_Write_String(lcdString);
 }
 
-void CheckPinSignal()
-{
-	return;
-	DDRE &= ~ 0b00010000;
-	if (PINE & (1<<PINE4))
-	{
-		spinReels = SPIN_ON;
-	}
-	else
-	{
-		spinReels = SPIN_OFF;
-	}
-}
 
 void SM_SpinWheel()
 {
 	KP_Enable_Spin();
 	int count = 1;
-	CheckPinSignal(); 
 	if (gGameData.smState == SM_USER_WAIT)
 	{
 		SM_EnableIdleTimer();
@@ -163,7 +149,6 @@ void SM_SpinWheel()
         SM_UpdateLCDReels();
 		SM_SpinningLights();
        _delay_ms(SPIN_DELAY);
-	   CheckPinSignal();
     }
 	KP_Disable_Spin();
     
