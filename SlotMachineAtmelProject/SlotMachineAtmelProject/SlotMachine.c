@@ -116,6 +116,14 @@ void SM_UpdateLCDWinValue()
    LCD_Write_String(lcdString);
 }
 
+/******************************************************************************
+SM_SpinWheel() is the main function for game play
+- When the state is SM_USER_WAIT, idle time out is started
+- If spin is on then bet button is disabled and ider timer is disabled.
+- three wheels spin in three different speeds
+- when wheel is stopped the bet button is disabled until the results are updated on the lcd
+- different light effects are set based on event and functionality
+*******************************************************************************/
 
 void SM_SpinWheel()
 {

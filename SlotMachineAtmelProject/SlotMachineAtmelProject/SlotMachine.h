@@ -4,6 +4,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+/******************************************************************************
+ MACROs defined for initial values and maximum values
+MACROs for different sections of lcd start column and rows are defined 
+MACROs for fixed texts to be displayed into sections are defined
+*******************************************************************************/
 
 #define START_BALANCE 2000
 #define MAX_BET 3
@@ -64,6 +69,10 @@
 
 #define IDLE_TIME_OUT_VALUE 10
 
+/******************************************************************************
+MACROS for reward values are defined
+
+******************************************************************************/
 #define DOLLAR_REWARD  10 
 #define YEN_REWARD  20 
 #define HASH_REWARD  30 
@@ -72,8 +81,16 @@
 
 #define DOUBLE_MATCH_REWARD 5
 
+/******************************************************************************
+Enum for states defined
+******************************************************************************/
 
 typedef enum _gameState {SM_INIT, SM_USER_WAIT, SM_IDLE_TIMER_START, SM_SPIN, SM_IDLE} GameState;
+
+/******************************************************************************
+structure for player specific data
+Bet is set to volatile as it gets updated in ISR
+******************************************************************************/
 
 typedef struct _playerData {
     uint16_t Balance;
@@ -81,6 +98,11 @@ typedef struct _playerData {
 } PlayerData;
 
 
+/******************************************************************************
+Structure Game related Data
+currently stopGame variable is not used 
+smState is updated in ISR so it is make volatile
+******************************************************************************/
 
 typedef struct _gameData {
     PlayerData playerData;
@@ -97,6 +119,10 @@ volatile unsigned char spinReels;
 extern volatile unsigned int idleTimeOut;
 extern GameData gGameData;
 
+
+/******************************************************************************
+Functions for game logic
+******************************************************************************/
 
 void SM_InitGameData();
 
@@ -121,6 +147,9 @@ void SM_InitialiseIdleTimer();
 void SM_EnableIdleTimer();
 void SM_DisableIdleTimer();
 
+/******************************************************************************
+Functions for different lighting effects
+******************************************************************************/
 void SM_BetPressedLights();
 void SM_SpinPressedLights();
 void SM_SpinningLights();
