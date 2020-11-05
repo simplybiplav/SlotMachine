@@ -1,4 +1,4 @@
-\documentclass[a4paper,13pt,sffamily,margin=20mm]{memoir}
+\documentclass[a4paper,13pt,openany,sffamily]{memoir}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx}
@@ -6,25 +6,30 @@
 \usepackage{listings}
 \usepackage{amsmath}
 \usepackage{pdfpages}
-%\usepackage{geometry}
+\usepackage{geometry}
 
-%\newgeometry{top=20mm, bottom=20mm, right=20mm, left=20mm}
+\pagenumbering{arabic}
+
+\newgeometry{top=20mm, bottom=20mm, right=25mm, left=25mm}
 %\geometry{a4paper, margin=20mm}
 
 
 \sffamily
-\title{Slot Machine}
-\author{Biplav Karna}
-\date{2020}
-\let\stdsection\section
-\renewcommand\section{\newpage\stdsection}
+
+\pretitle{\begin{center}\Large \bfseries Final Report \\*}
+\title{\Huge\bfseries ES-ESP5200 Modern Embedded Systems programming Coursework 2020}
+\posttitle{\par\vskip1em{\normalfont\Large \bfseries \textit { Design, development , testing and evaluation of Slot Machine} \par\vfill}\end{center}}
+\author{\LARGE \bfseries Biplav Karna}
+%\date{\vfill\begin{center}\large November 2020}
+\predate{\vfill\begin{center}\large}
+
+
+%\let\stdsection\section
+%\renewcommand\section{\newpage\stdsection}
 
 \begin{document}
 
-\frontmatter
-
 \maketitle
-
 
 \chapter {Introduction}
 Slot machine is a game device easily available at every game parlour and casino. Figure \ref{Fig_Casino_Slot_Machine} shows a slot machine. It has 3 spinning wheels, lever to start the spin, place to insert coin, display to show progress. It has some lighting effects and sound effects. 
@@ -92,10 +97,13 @@ Timing requirements for the system are
 \item player loses the game, if the balance becomes zero.
 \end{itemize}
 
+\newpage
+Symbols used for spinning wheels are \(\$\) (dollar), \(Y\) (Yen), \(\#\) (pound), \(\sum\) (summation) and \(\pi\) (pi). There are three placeholder in LCD for 3 wheels. Each of these values are initialized with random seed when system is reset. The three wheels spin at differnt rate, 2nd wheel's spin is twice slower than first and 3rd wheel spins trice slower than first. The reward is matched with specific patterns and they are listed below. 
+
 \large \textbf {Reward Patterns:}
 
 \begin{itemize}
-\item \normalsize \( \pi\ sym\ sym = bet * 5 \)   
+\item \normalsize \( \pi\ sym\ sym = bet * 5 \)  [ pi and other two same symbol except \(\pi\) ] 
 \item \( \$ \$ \$ = bet * 10 \)  
 \item \( Y Y Y = bet * 20  \)
 \item \( \# \# \# = bet * 30 \) 
@@ -103,16 +111,70 @@ Timing requirements for the system are
 \item \normalsize \( \pi \pi \pi = bet * 100 \)   
 \end{itemize}
  
+The probability of reward pattern can be expressed as \bfseries \( \frac{9}{5!} \).
+
+\newpage
+The main loop intializes the values and runs SM\_SpinWheel() function in infinte loop. SM\_SpinWheel checks for spin is started or stopped.When started, it updates the spinning wheels with delay of 100 ms. When stopped it updates the reward win and balance. When spin is stoppedactivity timeout timer is started. When spin gets started the timer is stopped. The flow chart of main loop is shown in figure \ref{Fig_Main_Loop}. 
+\newlength{\textundbildtextheight}
+ 
+\begin{figure}[h]
+\centering{
+\includegraphics[height=0.7\textheight,width=\linewidth,keepaspectratio=true]{MainFlowchart.jpg}
+}
+\caption{Main Loop flow chart }
+\label{Fig_Main_Loop}
+\end{figure}
 
 
+\clearpage
+The spin button is mapped to external interrupt 0. The flow chart of ISR0 is shown in figure \ref{Fig_ISR0_Loop}.
+\begin{figure}[h]
+\centering{
+\includegraphics[height=\textheight,width=\linewidth,keepaspectratio]{ISR0Loop.jpg}
+}
+\caption{ISR0 / spin button flow chart }
+\label{Fig_ISR0_Loop}
+\end{figure}
 
+
+\clearpage
+The bet button is mapped to external interrupt 1. The flow chart of ISR1 iss shown in figure \ref{Fig_ISR1_Loop}.
+\begin{figure}[h]
+\centering{
+\includegraphics[height=\textheight,width=\linewidth,keepaspectratio]{ISR1Loop.jpg}
+}
+\caption{ISR1 / bet button flow chart }
+\label{Fig_ISR1_Loop}
+\end{figure}
+
+\clearpage
+Timer 1 is used for checking the inactivity of player. If the inactivity is for more than 20 sec. The screen throws "Press to Play" to message. The flow chart for ISR for Timer is shown in figure \ref{Fig_ISR_Timer0}. 
+\begin{figure}[h]
+\centering{
+\includegraphics[height=\textheight,width=\linewidth,keepaspectratio]{ISR_Timer0.jpg}
+}
+\caption{ISR Timer0 / Activity timeout flow chart }
+\label{Fig_ISR_Timer0}
+\end{figure}
+
+\clearpage
+\newpage
+There are 5 states in this design, and they are SM\_INIT, SM\_USER\_WAIT, SM\_IDLE\_TIMER\_START, SM\_SPIN, SM\_IDLE. The state transition is shown in figure \ref{Fig_State_Diagram}. 
+
+\begin{figure}[h]
+\centering{
+\includegraphics[height=0.7\textheight,width=\linewidth,keepaspectratio]{stateDiagram.jpg}
+}
+\caption{ISR Timer0 / Activity timeout flow chart }
+\label{Fig_State_Diagram}
+\end{figure}
 
 \chapter {Testing}
 Black box and white box testing is done for the project. Codes were modified to replicate the desired testing scenarios. The list of test cases are listed below in tabular form.
 
 \includepdf[pages=-]{Testing_Matrix.pdf}
 
-The Worst Case Execution Time WCET can be considered for the time of response when the spin is stopped and the values get updated. Consdering 1Mz clock speed, 37 \(\mu\)s write and command time for LCD, WCET can be calculated from code walkthrough. In function SM\_SpinWheel() in file SlotMachine.c, a while loop runs when spin is on, i.e. \textbf{while(SPIN\_ON == spinReels)}. It is considered the main routine is exactyly at this point when ISR routine for spin button is pressed. The longest code path till the LCD update occurs give the WCET. No reward pattern is considered for the longest code traversal. The calculated WCET rounds off to 104 ms.
+The Worst Case Execution Time WCET can be considered for the time of response when the spin is stopped and the values get updated. Consdering 1Mz clock speed, 37 \(\mu\)s write and command time for LCD, WCET can be calculated from code walk through. In function SM\_SpinWheel() in file SlotMachine.c, a while loop runs when spin is on, i.e. \textbf{while(SPIN\_ON == spinReels)}. It is considered the main routine is exactyly at this point when ISR routine for spin button is pressed. The longest code path till the LCD update occurs give the WCET. No reward pattern is considered for the longest code traversal. The calculated WCET rounds off to 104 ms.
 
 
 \chapter {Source Listing}
@@ -167,5 +229,13 @@ The Worst Case Execution Time WCET can be considered for the time of response wh
 
 
 \chapter {Critical evaluation and Conclusion}
+All the major aspects and functionalities of the project are developed.The developed project works almost perfectly as intended. The realised system is shown in the figure \ref{Fig_Slot_Machine_Realised}. There is one unfinished work of maximum bet. A button which can set the bet value to maximum, instead of hitting bet button multiples times to reach the max value. The c functions for this is in place but are left unimplemented. The unimplemented code doesn't have any observable major impact on any such functionalities. The button bounce could be addressed by adding extra capacitive circuit for the buttons. The bench marking of time between the spin stop and LCD update hasn't been achieved. There is enough room to add further functionalities to it. One good feature would be to provide interface to allow setting of desired symbols and desired patterns for reward.   
 
+\begin{figure}[h]
+\centering{
+\includegraphics[width=\linewidth,height=0.6\textheight,keepaspectratio=true]{Slot_Machine.jpg}
+}
+\caption{Realised Slot Machine}
+\label{Fig_Slot_Machine_Realised}
+\end{figure}
 \end{document}
