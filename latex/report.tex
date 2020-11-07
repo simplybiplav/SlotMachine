@@ -18,7 +18,7 @@
 
 \pretitle{\begin{center}\Large \bfseries Final Report \\*}
 \title{\Huge\bfseries ES-ESP5200 Modern Embedded Systems programming Coursework 2020}
-\posttitle{\par\vskip1em{\normalfont\Large \bfseries \textit { Design, development , testing and evaluation of Slot Machine} \par\vfill}\end{center}}
+\posttitle{\par\vskip1em{\normalfont\Large \bfseries \textit { Design, development, testing and evaluation of Slot Machine} \par\vfill}\end{center}}
 \author{\LARGE \bfseries Biplav Karna}
 %\date{\vfill\begin{center}\large November 2020}
 \predate{\vfill\begin{center}\large}
@@ -57,7 +57,7 @@ Slot machine is implemented using below components
 \item supporting connections and components 
 \end{itemize}
 
-The circuit diagram of the implementation is shown in the figure \ref{Fig_Circuit_Diagram}. PA0-PA7 are used for data bus, and PG0-PG2 are used for control bus for LCD interfacing. PB0-PB7 are used for LEDs. PD1-PD0 are connected to two buttons for spin and bet functions. PD1-PD0 are used as external interrupts. 
+The circuit diagram of the implementation is shown in the figure \ref{Fig_Circuit_Diagram}. PA0-PA7 are used for data bus, and PG0-PG2 are used for control bus for LCD interfacing. PB0-PB7 are used for LEDs. PD0-PD1 are connected to two buttons for spin and bet functions. PD0-PD1 are used as external interrupts. 
 
 \begin{figure}[h]
 \centering{
@@ -114,8 +114,89 @@ Symbols used for spinning wheels are \(\$\) (dollar), \(Y\) (Yen), \(\#\) (pound
 The probability of reward pattern can be expressed as \( \frac{9}{5!} \).
 
 \newpage
-The main loop initializes the values and runs SM\_SpinWheel() function in infinite loop. SM\_SpinWheel checks for spin is started or stopped.When started, it updates the spinning wheels with delay of 100 ms. When stopped it updates the reward win and balance. When spin is stopped activity timeout timer is started. When spin gets started the timer is stopped. The flow chart of main loop is shown in figure \ref{Fig_Main_Loop}. 
-\newlength{\textundbildtextheight}
+The main loop initializes the values and runs SM\_SpinWheel() function in infinite loop. The flow chart of main loop is shown in figure \ref{Fig_Main_Loop}. SM\_SpinWheel checks for spin is started or stopped. When started, it updates the spinning wheels with delay of 100 ms. When stopped it updates the reward win and balance. When spin is stopped activity timeout timer is started. When spin gets started the timer is stopped. When spin is ON the bet button is disabled. When spin is stopped, the spin button is disabled until the LCD is updated with proper values of win and balance. The function SM\_SpinWheel is listed in listing \ref{lst_sm_spin_wheel}. 
+
+\begin{lstlisting}[numbers=left, breaklines=true,caption={ SM\_SpinWheel Function },label={lst_sm_spin_wheel},language=C]
+
+void SM_SpinWheel()
+{
+	KP_Enable_Spin();
+	int count = 1;
+	if (gGameData.smState == SM_USER_WAIT)
+	{
+		SM_EnableIdleTimer();
+		gGameData.smState = SM_IDLE_TIMER_START;
+	}
+	if(SPIN_OFF == spinReels) return;
+	SM_DisableIdleTimer();
+	gGameData.smState = SM_SPIN;
+    KP_Disable_Bet();
+    KP_Disable_Bet_Max();
+	SM_LightsOff();
+    while(SPIN_ON == spinReels)
+    {
+	   KP_Enable_Spin(); 	
+       gGameData.wheel1Pos = ( gGameData.wheel1Pos + 1 ) %spinWheelValuesLength;
+       if (count % 2 == 0) gGameData.wheel2Pos = ( gGameData.wheel2Pos + 1 ) %spinWheelValuesLength;
+       if (count % 3 == 0) gGameData.wheel3Pos = ( gGameData.wheel3Pos + 1 ) %spinWheelValuesLength;
+	   if (count >= 3)
+	   {
+		    count = 1;
+	   }
+	   else
+	   {
+	   	   count++;
+	   }
+        SM_UpdateLCDReels();
+		SM_SpinningLights();
+       _delay_ms(SPIN_DELAY);
+    }
+	KP_Disable_Spin();
+    
+
+    gGameData.winValue = SM_WinValue();
+    if (gGameData.winValue == 0 )
+    {
+        if (gGameData.playerData.Balance >= gGameData.playerData.Bet)
+        {
+            gGameData.playerData.Balance -= gGameData.playerData.Bet;
+        }
+        else
+        {
+            gGameData.playerData.Balance = 0;
+        }
+        if ( 0 == gGameData.playerData.Balance)
+        {
+            
+            SM_GameOver();
+			_delay_ms(DISPLAY_BANNER_DELAY);
+			SM_InitGameData();
+			LCD_Clear();
+        }
+    }
+    else
+    {
+		SM_BetWonLights();
+        gGameData.playerData.Balance += gGameData.winValue;
+        if (gGameData.playerData.Balance >= MAX_WIN_BALANCE)
+        {
+            gGameData.playerData.Balance = MAX_WIN_BALANCE;
+            SM_Winner();
+			gGameData.smState = SM_IDLE;
+			_delay_ms(DISPLAY_BANNER_DELAY);
+			SM_InitGameData();
+			LCD_Clear();	
+        } 
+
+    }
+    SM_UpdateLCD();
+	KP_Enable_Spin();
+    KP_Enable_Bet();
+    KP_Enable_Bet_Max();
+	gGameData.smState = SM_USER_WAIT;
+	SM_UserWaitLights();
+}
+\end{lstlisting}
  
 \begin{figure}[h]
 \centering{
@@ -127,7 +208,7 @@ The main loop initializes the values and runs SM\_SpinWheel() function in infini
 
 
 \clearpage
-INT1 and INT0 are used for external interrupts. The interrupt sense is set to falling-edge triggerd. The snippet of the code is shown in listing \ref{lst_ext_interrupt}.
+INT1 and INT0 are used for external interrupts. The interrupt sense is set to falling-edge triggered. The snippet of the code is shown in listing \ref{lst_ext_interrupt}.
 \begin{lstlisting}[numbers=left,breaklines=true,caption={External interrupts initialization },label={lst_ext_interrupt},language=C]
 	EICRA = 0b00001111;		// INT 3,2 not used, Interrupt Sense (INT1, INT0) falling-edge triggered
 	EICRB = 0b00000000;		// INT7 ... 4 not used
@@ -150,7 +231,7 @@ The spin button is mapped to external interrupt 0.  The flow chart of ISR0 is sh
 
 \clearpage
 
- The bet button is mapped to external interrupt 1. The flow chart of ISR1 is shown in figure \ref{Fig_ISR1_Loop}. In ISR1 when state is not STATE\_IDLE, the external interrupts are disabled, bet value is increased, bet value is updated on screen , light patterns are set, interrupt flags are cleared off and then external interrupts are enabled. In STATE\_IDLE, the state is changed to STATE\_USER\_WAIT, LCD is updated with game visuals and flags are cleared off.    
+ The bet button is mapped to external interrupt 1. The flow chart of ISR1 is shown in figure \ref{Fig_ISR1_Loop}. In ISR1 when state is not STATE\_IDLE, the external interrupts are disabled, bet value is increased, bet value is updated on screen, light patterns are set, interrupt flags are cleared off and then external interrupts are enabled. In STATE\_IDLE, the state is changed to STATE\_USER\_WAIT, LCD is updated with game visuals and flags are cleared off.    
 
 
 \begin{figure}[h]
@@ -230,11 +311,11 @@ Three timing diagram shows when three different interrupts are triggered.
 \end{figure}
 
 \chapter {Testing}
-Black box and white box testings were done for the project. The list of test cases are listed below in tabular form.
+Black box and white box testings were done for the project. The list of test cases is listed below in tabular form.
 
 \includepdf[pages=-]{Testing_Matrix.pdf}
 
-The Worst Case Execution Time WCET can be considered for the time of response when the spin is stopped and the values get updated. Considering 1Mz clock speed, 37 \(\mu\)s write and command time for LCD, WCET can be calculated from code walk through. In function SM\_SpinWheel() in file SlotMachine.c, a while loop runs when spin is on, i.e. \textbf{while(SPIN\_ON == spinReels)}. It is considered the main routine is exactly at this point when ISR routine for spin button is pressed. The longest code path till the LCD update occurs give the WCET. No reward pattern is considered for the longest code traversal. The calculated WCET rounds off to 104 ms.
+The Worst Case Execution Time (WCET) can be considered for the time of response when the spin is stopped, and the values get updated. Considering 1Mz clock speed, 37 \(\mu\)s write and command time for LCD, WCET can be calculated from code walk through. In function SM\_SpinWheel() in file SlotMachine.c, a while loop runs when spin is on, i.e. \textbf{while(SPIN\_ON == spinReels)}. It is considered the main routine is exactly at this point when ISR routine for spin button is pressed. The longest code path till the LCD update occurs give the WCET. No reward pattern is considered for the longest code traversal. The calculated WCET rounds off to 104 ms.
 
 
 \chapter {Source Listing}
@@ -246,7 +327,7 @@ The Worst Case Execution Time WCET can be considered for the time of response wh
 \item KeyPad.h \\*
     Buttons related functions are declared here.
 \item LcdLibrary.h \\*
-    LCD related functions are declared and related macros are defined here.
+    LCD related functions are declared, and related macros are defined here.
     
 \item SlotMachine.h \\*
     Game related data structure and variables are declared here.
@@ -260,6 +341,9 @@ The Worst Case Execution Time WCET can be considered for the time of response wh
     Main and ISR routines are defined here.
     
 \end{itemize}
+
+The source code is also available at \href{https://github.com/simplybiplav/SlotMachine}{github}.
+
 
 \section{Config.h}
 \begin{small}
@@ -316,7 +400,7 @@ The Worst Case Execution Time WCET can be considered for the time of response wh
 
 
 \chapter {Critical evaluation and Conclusion}
-All the major aspects and functionalities of the project are developed.The developed project works almost perfectly as intended. The realised system is shown in the figure \ref{Fig_Slot_Machine_Realised}. There is one unfinished work of maximum bet. A button which can set the bet value to maximum, instead of hitting bet button multiples times to reach the max value. The c functions for this is in place but are left unimplemented. The unimplemented code doesn't have any observable major impact on any such functionalities. The button bounce could be addressed by adding extra capacitive circuit for the buttons. The bench marking of time between the spin stop and LCD update hasn't been achieved. There is enough room to add further functionalities to it. One good feature would be to provide interface to allow setting of desired symbols and desired patterns for reward.   
+All the major aspects and functionalities of the project are developed.The developed project works almost perfectly as intended. The developed system is shown in the figure \ref{Fig_Slot_Machine_Realised}. There is one unfinished work of maximum bet. A button which can set the bet value to maximum, instead of hitting bet button multiples times to reach the max value. The c functions for this is in place but are left unimplemented. The unimplemented code doesn't have any observable major impact on any such functionalities. The button bounce could be addressed by adding extra capacitive circuit for the buttons. The bench marking of time between the spin stop and LCD update hasn't been achieved. There is enough room to add further functionalities to it. One good feature would be to provide interface to configure desired symbols and desired patterns for reward.   
 
 \begin{figure}[h]
 \centering{
