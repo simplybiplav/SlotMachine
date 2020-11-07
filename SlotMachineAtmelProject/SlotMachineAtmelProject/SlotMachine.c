@@ -318,13 +318,14 @@ void SM_DisableIdleTimer()
 	TCCR1B = 0b00001000;
 }
 
-void SM_InitialiseIdleTimer()         // Configure to generate an interrupt after a 1-Second interval
+void SM_InitialiseIdleTimer()         
 {
 	TCCR1A = 0b00000000;    // Normal port operation (OC1A, OC1B, OC1C), Clear Timer on 'Compare Match' (CTC) waveform mode)
 	TCCR1B = 0b00001000;    // CTC waveform mode, initially stopped (no clock)
 	TCCR1C = 0b00000000;
 
-	// For 1 MHz clock (with 1024 prescaler) to achieve a 1 second interval:
+	// clock = 1 MHz , prescaler = 1024,
+    // to achieve  1 second interval:
 	// Need to count 1 million clock cycles (but already divided by 1024)
 	// So actually need to count to (1000000 / 1024 =) 976 decimal, = 3D0 Hex
 	OPER_16_BIT_START
